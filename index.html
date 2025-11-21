@@ -37,25 +37,23 @@
 
         // ===== CONFIGURATION - UPDATE FOR EACH CLIENT =====
         const CONFIG = {
-            // TODO: Replace with client-specific values
-            SHEET_ID: '1TNBlbHauHOkcMNi16NzJt94Zy_qet7QhOVKIuiOmD0k',
+            SHEET_ID: '1OQxNLz4IuwsVOSVBTOyvZK-a_9mog81Cns5XGZYBFXU',
             API_KEY: 'AIzaSyABznAS0fH0tYNh6wlS_iEL08b6znNJCL8',
             CLIENT_INFO_SHEET: 'Client Info',
             ADS_SHEET: 'Ads Masterlist',
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwsipHBdm_x2tUIuEfb5doByUnNZKA0n6qqno7Uqja6km0Ktfq3EYqBsTVQ_iP8EazdPA/exec',
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbynP-7NA6OgMENqgH8HE4BR_VuP1lxf7syPOB_avUX570Sm2Ci2a4LELJUN9ukA9-QT/exec',
             
-            // Column mapping - DO NOT CHANGE unless sheet structure changes
             ADS_COLUMNS: {
-                STATUS: 0,
-                AD_NAME: 1,
-                CAMPAIGN_ANGLE: 2,
-                HEADLINE: 3,
-                AD_COPY: 4,
-                CREATIVE_ASSETS: 6,
-                RECOMMENDED_CTA: 7,
-                IMAGE_TEXT: 8,
-                CLIENT_NOTE: 9,
-                UPDATED_DATE: 10
+                STATUS: 0,              // Column A
+                AD_NAME: 1,             // Column B
+                CAMPAIGN_ANGLE: 2,      // Column C
+                HEADLINE: 3,            // Column D
+                AD_COPY: 4,             // Column E
+                CREATIVE_ASSETS: 6,     // Column G (Direct URL - auto-converted!)
+                RECOMMENDED_CTA: 7,     // Column H (CTA dropdown)
+                IMAGE_TEXT: 8,          // Column I
+                CLIENT_NOTE: 9,         // Column J
+                UPDATED_DATE: 10        // Column K
             },
             
             CLIENT_COLUMNS: {
@@ -67,7 +65,7 @@
             }
         };
 
-        const FacebookAdCard = ({ ad, showActions, editNotes, handleNotesChange, updating, updateAdStatus, imageErrors, handleImageError }) => {
+        const FacebookAdCard = ({ ad, showActions, editNotes, handleNotesChange, updating, updateAdStatus, revertAdStatus, imageErrors, handleImageError }) => {
             const [isExpanded, setIsExpanded] = useState(false);
             const bodyLength = ad.adCopy?.length || 0;
             const shouldCollapse = bodyLength > 125;
@@ -81,7 +79,7 @@
                     maxWidth: '600px',
                     margin: '0 auto 24px auto'
                 }}>
-                    {/* Header */}
+                    {/* Header: Profile + Sponsored */}
                     <div style={{
                         padding: '12px 16px',
                         display: 'flex',
@@ -144,7 +142,7 @@
                         </div>
                     </div>
 
-                    {/* Body Copy */}
+                    {/* Body Copy ONLY (No headline here!) */}
                     {ad.adCopy && (
                         <div style={{
                             padding: '0 16px 12px 16px',
@@ -191,7 +189,7 @@
                         </div>
                     )}
 
-                    {/* Image */}
+                    {/* Image - Full Width */}
                     <div style={{ width: '100%', backgroundColor: '#f0f2f5' }}>
                         {ad.creativeAsset && !imageErrors[ad.rowIndex] ? (
                             <img
@@ -227,7 +225,7 @@
                         )}
                     </div>
 
-                    {/* Link Preview Box */}
+                    {/* Link Preview Box - Headline + CTA on same line */}
                     <div style={{
                         backgroundColor: '#f0f2f5',
                         padding: '12px',
@@ -248,35 +246,39 @@
                         
                         {ad.headline && (
                             <div style={{
-                                fontSize: '16px',
-                                fontWeight: '600',
-                                color: '#050505',
-                                lineHeight: '20px',
-                                marginBottom: '8px'
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                justifyContent: 'space-between'
                             }}>
-                                {ad.headline}
+                                <div style={{
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    color: '#050505',
+                                    lineHeight: '20px',
+                                    flex: 1
+                                }}>
+                                    {ad.headline}
+                                </div>
+                                <button style={{
+                                    padding: '10px 20px',
+                                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                                    color: '#050505',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    fontSize: '15px',
+                                    fontWeight: '600',
+                                    cursor: 'default',
+                                    whiteSpace: 'nowrap',
+                                    flexShrink: 0
+                                }}>
+                                    Learn more
+                                </button>
                             </div>
-                        )}
-                        
-                        {ad.recommendedCTA && (
-                            <button style={{
-                                width: '100%',
-                                padding: '9px',
-                                backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                                color: '#050505',
-                                border: 'none',
-                                borderRadius: '4px',
-                                fontSize: '14px',
-                                fontWeight: '600',
-                                cursor: 'default',
-                                textAlign: 'center'
-                            }}>
-                                {ad.recommendedCTA}
-                            </button>
                         )}
                     </div>
 
-                    {/* Engagement Bar */}
+                    {/* Like/Comment/Share Bar */}
                     <div style={{
                         padding: '4px 16px',
                         display: 'flex',
@@ -300,7 +302,7 @@
                         ))}
                     </div>
 
-                    {/* Admin Actions */}
+                    {/* Admin Actions - FOR PENDING ADS */}
                     {showActions && (
                         <div style={{
                             padding: '16px',
@@ -374,6 +376,40 @@
                         </div>
                     )}
 
+                    {/* REVERT BUTTON - FOR ACTIONED ADS */}
+                    {!showActions && revertAdStatus && (
+                        <div style={{
+                            padding: '16px',
+                            backgroundColor: '#f8f9fa',
+                            borderTop: '2px solid #6b7280'
+                        }}>
+                            <button
+                                onClick={() => revertAdStatus(ad)}
+                                disabled={updating[ad.rowIndex]}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 16px',
+                                    backgroundColor: updating[ad.rowIndex] ? '#ccc' : '#6b7280',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    cursor: updating[ad.rowIndex] ? 'not-allowed' : 'pointer',
+                                    transition: 'opacity 0.2s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px'
+                                }}
+                                onMouseOver={(e) => { if (!updating[ad.rowIndex]) e.target.style.opacity = '0.9'; }}
+                                onMouseOut={(e) => { e.target.style.opacity = '1'; }}
+                            >
+                                {updating[ad.rowIndex] ? '⏳ Reverting...' : '↩️ Revert to Pending Review'}
+                            </button>
+                        </div>
+                    )}
+
                     {/* Feedback Display */}
                     {!showActions && ad.actionNotes && (
                         <div style={{
@@ -441,7 +477,13 @@
 
             const loadActionedAds = () => {
                 const stored = localStorage.getItem('actionedAds');
-                if (stored) setActionedAds(JSON.parse(stored));
+                if (stored) {
+                    try {
+                        setActionedAds(JSON.parse(stored));
+                    } catch (e) {
+                        console.error('Error loading actioned ads:', e);
+                    }
+                }
             };
 
             const saveActionedAd = (ad, status, notes) => {
@@ -456,7 +498,25 @@
                     const updated = { ...prev };
                     const key = status === 'Approved' ? 'approved' : 
                                 status === 'Needs Edit' ? 'needsEdit' : 'rejected';
+                    
+                    // Remove from other categories if exists
+                    ['approved', 'needsEdit', 'rejected'].forEach(cat => {
+                        updated[cat] = updated[cat].filter(a => a.rowIndex !== ad.rowIndex);
+                    });
+                    
+                    // Add to new category
                     updated[key] = [actionedAd, ...updated[key]];
+                    localStorage.setItem('actionedAds', JSON.stringify(updated));
+                    return updated;
+                });
+            };
+
+            const removeActionedAd = (rowIndex) => {
+                setActionedAds(prev => {
+                    const updated = { ...prev };
+                    ['approved', 'needsEdit', 'rejected'].forEach(cat => {
+                        updated[cat] = updated[cat].filter(a => a.rowIndex !== rowIndex);
+                    });
                     localStorage.setItem('actionedAds', JSON.stringify(updated));
                     return updated;
                 });
@@ -473,10 +533,13 @@
                                     setAds(cachedAds);
                                     setClientInfo(cachedClient);
                                     setLoading(false);
+                                    // Still fetch in background to sync
                                     fetchAds(false);
                                     return;
                                 }
-                            } catch (e) {}
+                            } catch (e) {
+                                console.error('Cache error:', e);
+                            }
                         }
                     }
 
@@ -514,7 +577,8 @@
                     if (adsData.values && adsData.values.length > 0) {
                         const rows = adsData.values.slice(1);
 
-                        const adsArray = rows.map((row, index) => ({
+                        // Get all pending ads
+                        const pendingAds = rows.map((row, index) => ({
                             rowIndex: index + 2,
                             businessName: extractedClientInfo.businessName,
                             websiteUrl: extractedClientInfo.websiteUrl,
@@ -535,10 +599,13 @@
                             ad.status.toLowerCase() === 'pending'
                         );
 
-                        setAds(adsArray);
+                        // Sync actioned ads with sheet status
+                        syncActionedAdsWithSheet(rows, extractedClientInfo);
+
+                        setAds(pendingAds);
                         
                         localStorage.setItem('cachedAds', JSON.stringify({
-                            ads: adsArray,
+                            ads: pendingAds,
                             clientInfo: extractedClientInfo,
                             timestamp: Date.now()
                         }));
@@ -551,6 +618,45 @@
                     console.error('Error:', err);
                     setError(err.message);
                     setLoading(false);
+                }
+            };
+
+            const syncActionedAdsWithSheet = (allRows, clientInfo) => {
+                const stored = localStorage.getItem('actionedAds');
+                if (!stored) return;
+
+                try {
+                    const actionedAds = JSON.parse(stored);
+                    let hasChanges = false;
+
+                    // Check each actioned ad against current sheet status
+                    ['approved', 'needsEdit', 'rejected'].forEach(category => {
+                        actionedAds[category] = actionedAds[category].filter(ad => {
+                            const rowIndex = ad.rowIndex - 2; // Convert back to array index
+                            if (rowIndex >= 0 && rowIndex < allRows.length) {
+                                const currentStatus = allRows[rowIndex][CONFIG.ADS_COLUMNS.STATUS] || '';
+                                const isStillActioned = currentStatus.toLowerCase() !== 'for review' && 
+                                                       currentStatus.toLowerCase() !== 'pending' && 
+                                                       currentStatus !== '';
+                                
+                                if (!isStillActioned) {
+                                    // Ad was changed back to "For Review" in sheet - remove from localStorage
+                                    hasChanges = true;
+                                    console.log(`Detected manual change: Ad ${ad.adName} (row ${ad.rowIndex}) changed back to For Review`);
+                                    return false;
+                                }
+                            }
+                            return true;
+                        });
+                    });
+
+                    if (hasChanges) {
+                        localStorage.setItem('actionedAds', JSON.stringify(actionedAds));
+                        setActionedAds(actionedAds);
+                        showNotification('✓ Portal synced with sheet changes', 'success');
+                    }
+                } catch (e) {
+                    console.error('Error syncing actioned ads:', e);
                 }
             };
 
@@ -600,6 +706,62 @@
                 }
             };
 
+            const revertAdStatus = async (ad) => {
+                if (!confirm('Revert this ad back to Pending Review?')) return;
+
+                setUpdating(prev => ({ ...prev, [ad.rowIndex]: true }));
+
+                try {
+                    // Update sheet status to "For Review"
+                    await fetch(CONFIG.APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            rowIndex: ad.rowIndex,
+                            status: 'For Review',
+                            notes: '', // Clear notes
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+
+                    // Remove from actioned ads
+                    removeActionedAd(ad.rowIndex);
+
+                    // Add back to pending ads with updated client info
+                    const revertedAd = {
+                        ...ad,
+                        status: 'For Review',
+                        actionStatus: undefined,
+                        actionNotes: undefined,
+                        actionDate: undefined
+                    };
+
+                    setAds(prev => [revertedAd, ...prev]);
+
+                    // Update cache
+                    localStorage.setItem('cachedAds', JSON.stringify({
+                        ads: [revertedAd, ...ads],
+                        clientInfo: clientInfo,
+                        timestamp: Date.now()
+                    }));
+
+                    showNotification('✓ Ad reverted to pending review!', 'success');
+
+                    // Switch to pending tab
+                    setActiveTab('pending');
+                } catch (err) {
+                    console.error('Revert error:', err);
+                    showNotification('✗ Failed to revert ad', 'error');
+                } finally {
+                    setUpdating(prev => {
+                        const updated = { ...prev };
+                        delete updated[ad.rowIndex];
+                        return updated;
+                    });
+                }
+            };
+
             const showNotification = (message, type) => {
                 const notification = document.createElement('div');
                 notification.textContent = message;
@@ -622,6 +784,14 @@
 
             const handleImageError = (rowIndex) => {
                 setImageErrors(prev => ({ ...prev, [rowIndex]: true }));
+            };
+
+            const forceRefresh = () => {
+                // Clear all caches
+                localStorage.removeItem('cachedAds');
+                localStorage.removeItem('actionedAds');
+                // Reload page
+                window.location.reload();
             };
 
             if (loading) {
@@ -675,14 +845,41 @@
                             padding: '20px',
                             backgroundColor: 'white',
                             borderRadius: '8px',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            gap: '12px'
                         }}>
-                            <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#050505', marginBottom: '4px' }}>
-                                Meta Ads Approval Portal
-                            </h1>
-                            <p style={{ fontSize: '14px', color: '#65676b' }}>
-                                {clientInfo?.businessName || 'Client'} - Review and approve ad campaigns
-                            </p>
+                            <div>
+                                <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#050505', marginBottom: '4px' }}>
+                                    Meta Ads Approval Portal
+                                </h1>
+                                <p style={{ fontSize: '14px', color: '#65676b' }}>
+                                    {clientInfo?.businessName || 'Client'} - Review and approve ad campaigns
+                                </p>
+                            </div>
+                            <button
+                                onClick={forceRefresh}
+                                style={{
+                                    padding: '10px 20px',
+                                    backgroundColor: '#1877f2',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                                onMouseOver={(e) => e.target.style.opacity = '0.9'}
+                                onMouseOut={(e) => e.target.style.opacity = '1'}
+                            >
+                                🔄 Force Refresh
+                            </button>
                         </div>
 
                         <div style={{
@@ -759,8 +956,9 @@
                         ) : (
                             <div style={{
                                 display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(600px, 1fr))',
-                                gap: '24px'
+                                gridTemplateColumns: 'repeat(2, 600px)',
+                                gap: '24px',
+                                justifyContent: 'center'
                             }}>
                                 {currentAds.map((ad) => (
                                     <FacebookAdCard
@@ -771,6 +969,7 @@
                                         handleNotesChange={handleNotesChange}
                                         updating={updating}
                                         updateAdStatus={updateAdStatus}
+                                        revertAdStatus={activeTab !== 'pending' ? revertAdStatus : null}
                                         imageErrors={imageErrors}
                                         handleImageError={handleImageError}
                                     />
